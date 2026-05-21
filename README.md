@@ -49,6 +49,24 @@ ScreenSeal/
 └── App.xaml
 ```
 
+## 在 macOS 上获取 Windows 可执行文件（GitHub Actions）
+
+无需本地 Windows 环境，推送代码后由 CI 自动打包：
+
+1. 打开仓库 [Actions](https://github.com/lissssssssss/ScreenSeal/actions) 页
+2. 选择 **Build Windows Release** 工作流，进入最近一次成功的运行
+3. 在 **Artifacts** 区域下载 `ScreenSeal-win-x64`，解压得到 `ScreenSeal.exe`
+4. 将 exe 拷贝到 Windows 10/11 机器上双击运行
+
+也可在 Actions 页点击 **Run workflow** 手动触发构建。
+
+打 tag 发布 Release（例如 `v1.0.0`）时，会自动创建 GitHub Release 并附上 exe：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
 ## 说明
 
-本仓库在 macOS/Linux 上仅可编辑代码；**编译与运行需在 Windows 上执行**。设计文档见 [ScreenSeal.md](./ScreenSeal.md)。
+本仓库在 macOS/Linux 上仅可编辑代码；**运行需在 Windows 上执行**。设计文档见 [ScreenSeal.md](./ScreenSeal.md)。
