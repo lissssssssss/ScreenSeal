@@ -26,10 +26,10 @@ internal static class User32
     public const uint MOD_SHIFT = 0x0004;
     public const uint MOD_WIN = 0x0008;
 
-    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+    internal delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
     [DllImport("user32.dll")]
-    public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+    internal static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
