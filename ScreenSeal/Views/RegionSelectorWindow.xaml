@@ -1,0 +1,22 @@
+<Window x:Class="ScreenSeal.Views.RegionSelectorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="#66000000"
+        WindowState="Maximized"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Cursor="Cross"
+        KeyDown="OnKeyDown">
+    <Canvas x:Name="RootCanvas">
+        <Border x:Name="SelectionRect"
+                BorderBrush="#FF4FC3F7"
+                BorderThickness="2"
+                Background="#44000000"
+                Visibility="Collapsed"/>
+        <TextBlock Canvas.Left="16" Canvas.Top="16"
+                   Foreground="White" FontSize="14"
+                   Text="拖拽鼠标选择遮挡区域，Enter 确认，Esc 取消"/>
+    </Canvas>
+</Window>
