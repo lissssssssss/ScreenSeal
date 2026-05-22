@@ -7,16 +7,6 @@ namespace ScreenSeal.Services;
 
 public sealed class WindowEnumerator
 {
-    private static readonly string[] DefaultProcessNames =
-    [
-        "WeChat", "QQ", "TIM", "DingTalk", "WXWork", "Feishu", "Lark"
-    ];
-
-    private static readonly string[] DefaultTitleKeywords =
-    [
-        "微信", "QQ", "TIM", "钉钉", "企业微信", "飞书"
-    ];
-
     private readonly ConfigService _config;
 
     public WindowEnumerator(ConfigService config) => _config = config;
@@ -24,14 +14,20 @@ public sealed class WindowEnumerator
     public IReadOnlyList<WindowInfo> FindPrivacyWindows()
     {
         var results = new List<WindowInfo>();
-        var processNames = DefaultProcessNames
+        var enabledIds = PrivacyAppCatalog.GetEffectiveEnabledIds(_config.Current);
+
+        var processNames = PrivacyAppCatalog.All
+            .Where(p => enabledIds.Contains(p.Id))
+            .SelectMany(p => p.ProcessNames)
             .Concat(_config.Current.CustomProcessNames)
             .Select(n => n.Trim())
             .Where(n => n.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var titleKeywords = DefaultTitleKeywords
+        var titleKeywords = PrivacyAppCatalog.All
+            .Where(p => enabledIds.Contains(p.Id))
+            .SelectMany(p => p.TitleKeywords)
             .Concat(_config.Current.CustomWindowTitleKeywords)
             .Select(k => k.Trim())
             .Where(k => k.Length > 0)

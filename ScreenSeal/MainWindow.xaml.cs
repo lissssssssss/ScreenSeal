@@ -14,6 +14,7 @@ public partial class MainWindow : Window
     private readonly HotkeyService _hotkeys = new();
     private readonly OverlayManager _overlayManager;
     private SettingsWindow? _settingsWindow;
+    private AppSelectionWindow? _appSelectionWindow;
 
     public MainWindow()
     {
@@ -40,6 +41,24 @@ public partial class MainWindow : Window
 
         UpdateTrayTooltip();
         StartupMenuItem.IsChecked = _config.Current.RunAtStartup;
+        ShowAppSelection();
+    }
+
+    private void ShowAppSelection()
+    {
+        if (_appSelectionWindow == null)
+        {
+            _appSelectionWindow = new AppSelectionWindow(_config);
+            _appSelectionWindow.StartPreciseMaskRequested += () =>
+            {
+                _overlayManager.TogglePreciseMask();
+                UpdateTrayTooltip();
+            };
+        }
+
+        _appSelectionWindow.LoadFromConfig();
+        _appSelectionWindow.Show();
+        _appSelectionWindow.Activate();
     }
 
     private void RegisterHotkeys()
@@ -88,6 +107,8 @@ public partial class MainWindow : Window
 
     private void OnTrayDoubleClick(object sender, RoutedEventArgs e) =>
         _overlayManager.TogglePreciseMask();
+
+    private void OnSelectApps(object sender, RoutedEventArgs e) => ShowAppSelection();
 
     private void OnTogglePrecise(object sender, RoutedEventArgs e)
     {

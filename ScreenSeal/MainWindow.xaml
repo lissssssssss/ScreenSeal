@@ -13,6 +13,7 @@
                     TrayMouseDoubleClick="OnTrayDoubleClick">
         <tb:TaskbarIcon.ContextMenu>
             <ContextMenu>
+                <MenuItem Header="选择应用..." Click="OnSelectApps"/>
                 <MenuItem Header="开启 IM 精准遮挡" Click="OnTogglePrecise"/>
                 <MenuItem Header="自定义区域遮挡" Click="OnCustomRegion"/>
                 <MenuItem Header="全屏模糊遮挡" Click="OnFullScreenBlur"/>
