@@ -45,8 +45,8 @@ ScreenSeal/
 ├── Models/           # 配置与窗口信息模型
 ├── Services/         # 热键、枚举、遮挡、锁定、配置
 │   └── Native/       # User32 P/Invoke
-├── Views/            # 应用选择、遮罩层、区域选择、设置窗口
-├── MainWindow.xaml   # 托盘入口（隐藏主窗口）
+├── Views/            # 遮罩层、区域选择、设置窗口
+├── MainWindow.xaml   # 主界面（应用选择）+ 托盘
 └── App.xaml
 ```
 

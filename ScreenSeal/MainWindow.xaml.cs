@@ -1,4 +1,6 @@
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 using ScreenSeal.Models;
 using ScreenSeal.Services;
@@ -13,18 +15,53 @@ public partial class MainWindow : Window
     private readonly WindowLockService _lockService = new();
     private readonly HotkeyService _hotkeys = new();
     private readonly OverlayManager _overlayManager;
+    private readonly Dictionary<string, CheckBox> _appChecks = new(StringComparer.OrdinalIgnoreCase);
     private SettingsWindow? _settingsWindow;
-    private AppSelectionWindow? _appSelectionWindow;
+    private bool _isExiting;
 
     public MainWindow()
     {
         InitializeComponent();
+        BuildAppList();
         _enumerator = new WindowEnumerator(_config);
         _overlayManager = new OverlayManager(_config, _enumerator, _lockService);
         _overlayManager.ModeChanged += OnOverlayModeChanged;
 
         Loaded += OnLoaded;
         Closing += OnClosing;
+    }
+
+    private void BuildAppList()
+    {
+        foreach (var preset in PrivacyAppCatalog.All)
+        {
+            var check = new CheckBox
+            {
+                Content = preset.DisplayName,
+                Tag = preset.Id,
+                Margin = new Thickness(0, 6, 0, 6),
+                FontSize = 14
+            };
+            _appChecks[preset.Id] = check;
+            AppListPanel.Children.Add(check);
+        }
+    }
+
+    private void LoadAppSelectionFromConfig()
+    {
+        var enabled = PrivacyAppCatalog.GetEffectiveEnabledIds(_config.Current);
+        foreach (var (id, check) in _appChecks)
+            check.IsChecked = enabled.Contains(id);
+    }
+
+    private void SaveAppSelection()
+    {
+        var enabled = _appChecks
+            .Where(kv => kv.Value.IsChecked == true)
+            .Select(kv => kv.Key)
+            .ToList();
+
+        _config.Update(c => c.EnabledAppIds = enabled);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -39,26 +76,38 @@ public partial class MainWindow : Window
         if (_config.Current.RunAtStartup != StartupService.IsEnabled())
             StartupService.SetEnabled(_config.Current.RunAtStartup);
 
+        LoadAppSelectionFromConfig();
         UpdateTrayTooltip();
         StartupMenuItem.IsChecked = _config.Current.RunAtStartup;
-        ShowAppSelection();
+
+        Show();
+        Activate();
+        WindowState = WindowState.Normal;
     }
 
-    private void ShowAppSelection()
+    public void ShowMainWindow()
     {
-        if (_appSelectionWindow == null)
+        LoadAppSelectionFromConfig();
+        ShowInTaskbar = true;
+        Show();
+        WindowState = WindowState.Normal;
+        Activate();
+    }
+
+    private void OnClosing(object? sender, CancelEventArgs e)
+    {
+        if (_isExiting)
         {
-            _appSelectionWindow = new AppSelectionWindow(_config);
-            _appSelectionWindow.StartPreciseMaskRequested += () =>
-            {
-                _overlayManager.TogglePreciseMask();
-                UpdateTrayTooltip();
-            };
+            _overlayManager.Dispose();
+            _hotkeys.Dispose();
+            TrayIcon.Dispose();
+            return;
         }
 
-        _appSelectionWindow.LoadFromConfig();
-        _appSelectionWindow.Show();
-        _appSelectionWindow.Activate();
+        SaveAppSelection();
+        e.Cancel = true;
+        Hide();
+        ShowInTaskbar = false;
     }
 
     private void RegisterHotkeys()
@@ -105,10 +154,32 @@ public partial class MainWindow : Window
         };
     }
 
-    private void OnTrayDoubleClick(object sender, RoutedEventArgs e) =>
-        _overlayManager.TogglePreciseMask();
+    private void OnTrayDoubleClick(object sender, RoutedEventArgs e) => ShowMainWindow();
 
-    private void OnSelectApps(object sender, RoutedEventArgs e) => ShowAppSelection();
+    private void OnShowMainWindow(object sender, RoutedEventArgs e) => ShowMainWindow();
+
+    private void OnSelectAll(object sender, RoutedEventArgs e)
+    {
+        foreach (var check in _appChecks.Values)
+            check.IsChecked = true;
+    }
+
+    private void OnSelectNone(object sender, RoutedEventArgs e)
+    {
+        foreach (var check in _appChecks.Values)
+            check.IsChecked = false;
+    }
+
+    private void OnSaveSelection(object sender, RoutedEventArgs e) => SaveAppSelection();
+
+    private void OnStartPreciseMask(object sender, RoutedEventArgs e)
+    {
+        SaveAppSelection();
+        _overlayManager.TogglePreciseMask();
+        UpdateTrayTooltip();
+        Hide();
+        ShowInTaskbar = false;
+    }
 
     private void OnTogglePrecise(object sender, RoutedEventArgs e)
     {
@@ -159,13 +230,9 @@ public partial class MainWindow : Window
         StartupService.SetEnabled(enabled);
     }
 
-    private void OnExit(object sender, RoutedEventArgs e) =>
-        Application.Current.Shutdown();
-
-    private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
+    private void OnExit(object sender, RoutedEventArgs e)
     {
-        _overlayManager.Dispose();
-        _hotkeys.Dispose();
-        TrayIcon.Dispose();
+        _isExiting = true;
+        Application.Current.Shutdown();
     }
 }
