@@ -8,8 +8,8 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
         ShowInTaskbar="True">
-    <Window.Resources>
-        <tb:TaskbarIcon x:Key="TrayIcon" x:Name="TrayIcon"
+    <Grid>
+        <tb:TaskbarIcon x:Name="TrayIcon"
                         ToolTipText="屏谧 ScreenSeal"
                         TrayMouseDoubleClick="OnTrayDoubleClick">
             <tb:TaskbarIcon.ContextMenu>
@@ -27,9 +27,8 @@
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
-    </Window.Resources>
 
-    <Grid Margin="24">
+        <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -67,4 +66,5 @@
                     Click="OnSaveSelection"/>
         </Grid>
     </Grid>
+</Grid>
 </Window>
