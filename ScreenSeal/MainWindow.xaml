@@ -9,7 +9,7 @@
         ResizeMode="CanMinimize"
         ShowInTaskbar="True">
     <Window.Resources>
-        <tb:TaskbarIcon x:Name="TrayIcon"
+        <tb:TaskbarIcon x:Key="TrayIcon" x:Name="TrayIcon"
                         ToolTipText="屏谧 ScreenSeal"
                         TrayMouseDoubleClick="OnTrayDoubleClick">
             <tb:TaskbarIcon.ContextMenu>
